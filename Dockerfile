@@ -1,14 +1,15 @@
-# Use an official OpenJDK image as a base
-FROM openjdk:17-jdk-alpine
+FROM maven:3.6.3-openjdk-17 AS mav_package
 
-# Set the working directory in the container
+COPY . .
+
+RUN mvn clean package -DskipTests
+
+FROM openjdk:17-jdk-slim
+
 WORKDIR /app
 
-# Copy the build artifact from the host to the container
-COPY target/*.jar app.jar
+COPY --from=mav_package target/eGlas-0.0.1-SNAPSHOT.jar app.jar
 
-# Expose the port the application runs on
 EXPOSE 8080
 
-# Run the jar file
 ENTRYPOINT ["java", "-jar", "app.jar"]
